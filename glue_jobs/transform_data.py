@@ -4,8 +4,15 @@
 %worker_type G.1X
 %number_of_workers 5
 
-import sys
+# Set your environment variables here
 import os
+
+os.environ['RAW_BUCKET'] = 'your-bucket'
+os.environ['CLEAN_BUCKET'] = 'your-bucket'
+os.environ['RAW_PREFIX'] = 'raw/'
+os.environ['CLEAN_PREFIX'] = 'clean/'
+
+import sys
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
@@ -23,14 +30,14 @@ job = Job(glueContext)
 # Configuration
 RAW_BUCKET = os.environ.get('RAW_BUCKET')
 CLEAN_BUCKET = os.environ.get('CLEAN_BUCKET')
-RAW_PREFIX = os.environ.get('RAW_PREFIX')
-CLEAN_PREFIX = os.environ.get('CLEAN_PREFIX')
+RAW_PREFIX = os.environ.get('RAW_PREFIX', 'raw/')
+CLEAN_PREFIX = os.environ.get('CLEAN_PREFIX', 'clean/')
 
 # Validate required configuration
-if RAW_BUCKET == 'your-default-bucket':
-    print("WARNING: Using default bucket name. Set RAW_BUCKET environment variable.")
-if CLEAN_BUCKET == 'your-default-bucket':
-    print("WARNING: Using default bucket name. Set CLEAN_BUCKET environment variable.")
+if not RAW_BUCKET:
+    raise ValueError("RAW_BUCKET environment variable is required")
+if not CLEAN_BUCKET:
+    raise ValueError("CLEAN_BUCKET environment variable is required")
 
 # Build S3 paths
 raw_path = f"s3://{RAW_BUCKET}/{RAW_PREFIX}"
@@ -48,7 +55,7 @@ def process_stock_data():
     """
     try:
         # Read raw JSON data from S3
-        print("Reading raw JSON data...")
+        print("Reading raw JSON data")
         df_raw = spark.read.json(raw_path)
         
         # Validate data exists
@@ -56,7 +63,7 @@ def process_stock_data():
             raise Exception("No data found in raw path")
         
         # Flatten nested JSON structure
-        print("Flattening data structure...")
+        print("Flattening data structure")
         df = df_raw.select(explode("data").alias("record")).select("record.*")
         
         # Define numeric columns for type casting
@@ -66,37 +73,40 @@ def process_stock_data():
         ]
         
         # Cast numeric columns to FloatType
-        print("Casting numeric columns...")
+        print("Casting numeric columns")
         for col_name in numeric_cols:
             if col_name in df.columns:
                 df = df.withColumn(col_name, df[col_name].cast(FloatType()))
         
         # Parse date column to timestamp
-        print("Processing date column...")
+        print("Processing date column")
         df = df.withColumn('date', to_timestamp('date', "yyyy-MM-dd'T'HH:mm:ssZ"))
         
         # Add calculated columns
-        print("➕ Adding calculated columns...")
+        print("Adding calculated columns")
         df = df.withColumn('daily_return', 
                           when(col('open') != 0, (col('close') - col('open')) / col('open'))
                           .otherwise(0)) \
                .withColumn('is_dividend_day', (col('dividend') > 0).cast(BooleanType()))
         
-        # Add partitioning columns
-        print("Adding partition columns...")
+        # Add partitioning columns  
+        print("Adding partition columns")
         df = df.withColumn('year', year('date')) \
                .withColumn('month', month('date'))
         
         # Sort data for optimal partitioning
-        print("Sorting data...")
+        print("Sorting data")
         df_clean = df.sort('symbol', 'date')
+        
+        # Get record count before showing sample
+        record_count = df_clean.count()
         
         # Show sample for verification
         print("Sample of processed data:")
         df_clean.show(5, truncate=False)
         
         # Write partitioned Parquet to S3
-        print("Writing partitioned Parquet files...")
+        print("Writing partitioned Parquet files")
         df_clean.write.mode('overwrite') \
             .partitionBy('symbol', 'year', 'month') \
             .option('compression', 'snappy') \
@@ -111,12 +121,13 @@ def process_stock_data():
         print(f"Processing failed: {str(e)}")
         return False
 
-# Execute transofrmation
+
+# Execute transformation
 if __name__ == "__main__":
     success = process_stock_data()
     
     if success:
-        print("Transofrmation completed successfully!")
+        print("ETL pipeline completed successfully!")
     else:
-        print("Transofrmation failed!")
+        print("ETL pipeline failed!")
         sys.exit(1)
