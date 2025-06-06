@@ -12,6 +12,7 @@ os.environ['CLEAN_BUCKET'] = 'your-bucket'
 os.environ['RAW_PREFIX'] = 'raw/'
 os.environ['CLEAN_PREFIX'] = 'clean/'
 
+# Main part
 import sys
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
@@ -27,7 +28,7 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 
-# Configuration
+# Configuration - now reads from environment variables we set above
 RAW_BUCKET = os.environ.get('RAW_BUCKET')
 CLEAN_BUCKET = os.environ.get('CLEAN_BUCKET')
 RAW_PREFIX = os.environ.get('RAW_PREFIX', 'raw/')
