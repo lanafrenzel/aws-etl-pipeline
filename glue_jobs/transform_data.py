@@ -14,6 +14,7 @@ os.environ['CLEAN_PREFIX'] = 'clean/'
 
 # Main part
 import sys
+import traceback
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
@@ -28,7 +29,7 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 
-# Configuration - now reads from environment variables we set above
+# Configuration 
 RAW_BUCKET = os.environ.get('RAW_BUCKET')
 CLEAN_BUCKET = os.environ.get('CLEAN_BUCKET')
 RAW_PREFIX = os.environ.get('RAW_PREFIX', 'raw/')
@@ -117,9 +118,10 @@ def process_stock_data():
         print(f"Data written to: {clean_path}")
         
         return True
-        
+    
     except Exception as e:
         print(f"Processing failed: {str(e)}")
+        traceback.print_exc() 
         return False
 
 
