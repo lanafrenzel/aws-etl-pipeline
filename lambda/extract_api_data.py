@@ -28,7 +28,7 @@ def lambda_handler(event, context):
         
         # build URL
         URL = f"{API_URL}?access_key={access_key}&symbols={symbols}&limit={limit}"
-        response = http.request('GET', URL, headers=headers)
+        response = http.request('GET', URL)
         
         if response.status != 200:
             raise Exception(f'Failed to fetch data: HTTP {response.status}')
@@ -61,9 +61,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': 200,
             'body': json.dumps({
-                'message': f"Data written to s3://{bucket}/{filename}",
-                'records_processed': len(data) if isinstance(data, list) else 1,
-                'timestamp': timestamp
+                'message': f"Data written to s3://{bucket}/{filename}"
             })
         }
         
