@@ -32,7 +32,7 @@ def lambda_handler(event, context):
 
     # upload to S3
     s3.put_object(
-        Bucket='lana-etl-pipeline',
+        Bucket=os.environ.get('BUCKET'),
         Key=filename,
         Body=json.dumps(data),
         ContentType='application/json'
