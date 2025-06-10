@@ -86,3 +86,13 @@ def process_stock_data():
     else:
         print("ETL pipeline failed")
         sys.exit(1)
+
+# Execute transformation
+if __name__ == "__main__":
+    success = process_stock_data()
+    
+    if success:
+        print("ETL pipeline completed successfully!")
+    else:
+        print("ETL pipeline failed!")
+        sys.exit(1)
