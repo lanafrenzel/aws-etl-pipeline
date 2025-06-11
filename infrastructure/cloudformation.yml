@@ -1,20 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  IAM roles and policies for ETL pipeline including Lambda, Glue, and Redshift Spectrum with least privilege.
+  IAM roles and policies for ETL pipeline including Lambda, Glue, and Redshift Spectrum, with least privilege access to S3 and Glue Catalog.
 
 Parameters:
   S3BucketName:
     Type: String
-    Description: Name of the ETL S3 bucket (e.g. lana-etl-pipeline)
+    Description: Name of the ETL S3 bucket
 
   AWSAccountId:
     Type: String
-    Description: AWS Account ID (used for scoping permissions)
+    Description: AWS Account ID (for resource ARNs)
 
   Region:
     Type: String
     Default: us-east-1
-    Description: AWS Region
+    Description: AWS region
 
 Resources:
 
@@ -94,9 +94,13 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
+              - Sid: AllowPassRoleToSelf
+                Effect: Allow
                 Action: iam:PassRole
                 Resource: !GetAtt GlueExecutionRole.Arn
+                Condition:
+                  StringEqualsIfExists:
+                    iam:PassedToService: glue.amazonaws.com
 
   GlueCrawlerRole:
     Type: AWS::IAM::Role
@@ -184,10 +188,17 @@ Resources:
 
 Outputs:
   LambdaExecutionRoleArn:
+    Description: ARN of the Lambda execution role
     Value: !GetAtt LambdaExecutionRole.Arn
+
   GlueExecutionRoleArn:
+    Description: ARN of the Glue job execution role
     Value: !GetAtt GlueExecutionRole.Arn
+
   GlueCrawlerRoleArn:
+    Description: ARN of the Glue Crawler role
     Value: !GetAtt GlueCrawlerRole.Arn
+
   RedshiftSpectrumAccessRoleArn:
+    Description: ARN of the Redshift Spectrum access role
     Value: !GetAtt RedshiftSpectrumAccessRole.Arn
