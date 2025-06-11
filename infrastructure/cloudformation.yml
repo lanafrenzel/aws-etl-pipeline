@@ -186,6 +186,46 @@ Resources:
                   - !Sub arn:aws:glue:${Region}:${AWSAccountId}:database/*
                   - !Sub arn:aws:glue:${Region}:${AWSAccountId}:table/*
 
+ StepFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: step_function_execution_role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: StepFunctionOrchestrationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: AllowLambdaInvocation
+                Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !Sub arn:aws:lambda:${Region}:${AWSAccountId}:function:*
+              
+              - Sid: AllowGlueJobExecution
+                Effect: Allow
+                Action:
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:GetJobRuns
+                Resource: !Sub arn:aws:glue:${Region}:${AWSAccountId}:job/*
+              
+              - Sid: AllowPassRoleToGlue
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt GlueExecutionRole.Arn
+                Condition:
+                  StringEqualsIfExists:
+                    iam:PassedToService: glue.amazonaws.com            
+
 Outputs:
   LambdaExecutionRoleArn:
     Description: ARN of the Lambda execution role
@@ -202,3 +242,8 @@ Outputs:
   RedshiftSpectrumAccessRoleArn:
     Description: ARN of the Redshift Spectrum access role
     Value: !GetAtt RedshiftSpectrumAccessRole.Arn
+
+  StepFunctionExecutionRoleArn:
+    Description: ARN of the Step Functions execution role
+    Value: !GetAtt StepFunctionExecutionRole.Arn
+
