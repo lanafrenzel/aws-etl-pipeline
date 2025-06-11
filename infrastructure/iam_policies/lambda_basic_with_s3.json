@@ -21,8 +21,8 @@
         "s3:PutObject"
       ],
       "Resource": [
-        "arn:aws:s3:::lana-etl-pipeline/raw/*",
-        "arn:aws:s3:::lana-etl-pipeline/clean/*"
+        "arn:aws:s3:::your-bucket/raw/*",
+        "arn:aws:s3:::your-bucket/clean/*"
       ]
     }
   ]
