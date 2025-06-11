@@ -16,8 +16,8 @@
       ],
       "Resource": [
         "arn:aws:glue:us-east-1:334960985201:catalog",
-        "arn:aws:glue:us-east-1:334960985201:database/your_db",
-        "arn:aws:glue:us-east-1:334960985201:table/your_db/*"
+        "arn:aws:glue:us-east-1:334960985201:database/etl_clean_db",
+        "arn:aws:glue:us-east-1:334960985201:table/etl_clean_db/*"
       ]
     },
     {
@@ -30,9 +30,19 @@
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::your-bucket",
-        "arn:aws:s3:::your-bucket/raw/*",
-        "arn:aws:s3:::your-bucket/clean/*"
+        "arn:aws:s3:::lana-etl-pipeline",
+        "arn:aws:s3:::lana-etl-pipeline/raw/*",
+        "arn:aws:s3:::lana-etl-pipeline/clean/*"
+      ]
+    },
+    {
+      "Sid": "GlueScriptAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::aws-glue-assets-334960985201-us-east-1/scripts/*"
       ]
     }
   ]
