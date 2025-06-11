@@ -27,7 +27,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::your-bucket",
-        "arn:aws:s3:::bucket/clean/*"
+        "arn:aws:s3:::your-bucket/clean/*"
       ]
     }
   ]
