@@ -226,6 +226,30 @@ Resources:
                   StringEqualsIfExists:
                     iam:PassedToService: glue.amazonaws.com            
 
+  GluePassRolePolicy:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: glue_pass_role_policy
+    AssumeRolePolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - glue.amazonaws.com
+          Action: sts:AssumeRole
+    Path: /
+    Policies:
+      - PolicyName: AllowGluePassRole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: AllowPassToGlueExecutionRole
+              Effect: Allow
+              Action: iam:PassRole
+              Resource: arn:aws:iam::334960985201:role/glue-execution
+
+
 Outputs:
   LambdaExecutionRoleArn:
     Description: ARN of the Lambda execution role
