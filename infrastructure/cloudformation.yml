@@ -2,9 +2,22 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   IAM roles and policies for ETL pipeline including Lambda, Glue, and Redshift Spectrum with least privilege.
 
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: Name of the ETL S3 bucket (e.g. lana-etl-pipeline)
+
+  AWSAccountId:
+    Type: String
+    Description: AWS Account ID (used for scoping permissions)
+
+  Region:
+    Type: String
+    Default: us-east-1
+    Description: AWS Region
+
 Resources:
 
-  # Lambda execution role with basic logging permissions only
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -27,9 +40,9 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "arn:aws:logs:*:*:*"
+                Resource:
+                  - !Sub arn:aws:logs:${Region}:${AWSAccountId}:log-group:/aws/lambda/*
 
-  # Glue execution role with scoped S3 and Glue permissions + PassRole
   GlueExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -47,21 +60,17 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              # List bucket permission for pipeline bucket
               - Effect: Allow
-                Action:
-                  - s3:ListBucket
-                Resource:
-                  - arn:aws:s3:::
-              # Read/write/delete objects in raw and clean folders
+                Action: s3:ListBucket
+                Resource: !Sub arn:aws:s3:::${S3BucketName}
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:PutObject
                   - s3:DeleteObject
                 Resource:
-                  - arn:aws:s3:::your-bucket/raw/*
-                  - arn:aws:s3:::your-bucket/clean/*
+                  - !Sub arn:aws:s3:::${S3BucketName}/raw/*
+                  - !Sub arn:aws:s3:::${S3BucketName}/clean/*
         - PolicyName: GlueServicePermissions
           PolicyDocument:
             Version: '2012-10-17'
@@ -74,21 +83,21 @@ Resources:
                   - glue:GetTables
                   - glue:GetPartition
                   - glue:GetPartitions
-                  - glue:CreateJob
                   - glue:StartJobRun
                   - glue:GetJobRun
                   - glue:GetJobRuns
-                Resource: "*"
+                Resource:
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:catalog
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:database/*
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:table/*
         - PolicyName: GluePassRolePolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              # Allow Glue to pass this execution role when starting jobs
               - Effect: Allow
                 Action: iam:PassRole
                 Resource: !GetAtt GlueExecutionRole.Arn
 
-  # Glue Crawler Role with S3 access to "clean" folder and Glue permissions
   GlueCrawlerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -107,24 +116,31 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action:
-                  - s3:ListBucket
-                Resource:
-                  - arn:aws:s3:::your-bucket
+                Action: s3:ListBucket
+                Resource: !Sub arn:aws:s3:::${S3BucketName}
               - Effect: Allow
-                Action:
-                  - s3:GetObject
-                Resource:
-                  - arn:aws:s3:::your-bucket/clean/*
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::${S3BucketName}/clean/*
         - PolicyName: GlueCrawlerGlueAccess
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: glue:*
-                Resource: "*"
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:CreateTable
+                  - glue:UpdateTable
+                  - glue:CreatePartition
+                  - glue:UpdatePartition
+                  - glue:BatchCreatePartition
+                Resource:
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:catalog
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:database/*
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:table/*
 
-  # Redshift Spectrum Access Role with read-only S3 + Glue catalog access
   RedshiftSpectrumAccessRole:
     Type: AWS::IAM::Role
     Properties:
@@ -142,19 +158,17 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              # Read-only access to the ETL pipeline bucket
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:ListBucket
                 Resource:
-                  - arn:aws:s3:::your-bucket
-                  - arn:aws:s3:::your-bucket/clean/*
-        - PolicyName: RedshiftSpectrumGlueCatalogAccess
+                  - !Sub arn:aws:s3:::${S3BucketName}
+                  - !Sub arn:aws:s3:::${S3BucketName}/clean/*
+        - PolicyName: RedshiftSpectrumGlueAccess
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              # Glue catalog access for Redshift Spectrum queries
               - Effect: Allow
                 Action:
                   - glue:GetDatabase
@@ -163,4 +177,17 @@ Resources:
                   - glue:GetTables
                   - glue:GetPartition
                   - glue:GetPartitions
-                Resource: "*"
+                Resource:
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:catalog
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:database/*
+                  - !Sub arn:aws:glue:${Region}:${AWSAccountId}:table/*
+
+Outputs:
+  LambdaExecutionRoleArn:
+    Value: !GetAtt LambdaExecutionRole.Arn
+  GlueExecutionRoleArn:
+    Value: !GetAtt GlueExecutionRole.Arn
+  GlueCrawlerRoleArn:
+    Value: !GetAtt GlueCrawlerRole.Arn
+  RedshiftSpectrumAccessRoleArn:
+    Value: !GetAtt RedshiftSpectrumAccessRole.Arn
