@@ -16,6 +16,9 @@ This folder contains **AWS IAM Role and Policy definitions** required for the ET
 * **redshift\_spectrum\_access\_policy.json**
   IAM policy granting Redshift Spectrum permissions to access Glue Catalog and S3 clean data.
 
+* **step_function_role_policy.json**
+IAM policy for AWS Step Functions to orchestrate Lambda and Glue steps with minimal permissions.
+
 * **pass\_role\_policy.json**
   Allows services to assume or pass roles where necessary, with explicit resource ARNs.
 
@@ -40,6 +43,14 @@ This folder contains **AWS IAM Role and Policy definitions** required for the ET
 
 ## Notes
 
-* Names in policies are placeholders. Replace `"your-bucket"` and `"your-db"` with your actual names.
-* The `PassRole` policy allows Glue jobs to pass execution roles — critical for Glue job execution.
+* Names in policies are placeholders. Replace `"your-bucket"`, `"your-db"`,  and resource ARNs with your actual infrastructure names.
+* The `PassRole` policy allows services like Glue and Step Functions to assume execution roles — this is **essential** for job execution.
 * AWS managed policies like `AWSLambdaBasicExecutionRole` and `AWSGlueServiceRole` are used alongside these custom policies for base permissions.
+* The **Step Function Role** requires permission to:
+  * Invoke specific Lambda functions
+  * Start and monitor specific Glue jobs
+  * Write logs to CloudWatch   
+
+Ensure these are tightly scoped to the services it coordinates.
+
+
