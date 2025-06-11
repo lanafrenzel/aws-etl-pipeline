@@ -1,0 +1,39 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "GlueJobExecution",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:CreateTable",
+        "glue:UpdateTable",
+        "glue:CreatePartition",
+        "glue:BatchCreatePartition"
+      ],
+      "Resource": [
+        "arn:aws:glue:us-east-1:334960985201:catalog",
+        "arn:aws:glue:us-east-1:334960985201:database/your_db",
+        "arn:aws:glue:us-east-1:334960985201:table/your_db/*"
+      ]
+    },
+    {
+      "Sid": "GlueS3Access",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::your-bucket",
+        "arn:aws:s3:::your-bucket/raw/*",
+        "arn:aws:s3:::your-bucket/clean/*"
+      ]
+    }
+  ]
+}
