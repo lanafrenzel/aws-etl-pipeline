@@ -40,6 +40,6 @@ This folder contains **AWS IAM Role and Policy definitions** required for the ET
 
 ## Notes
 
-* Bucket names in policies are placeholders. Replace `"lana-etl-pipeline"` with your actual bucket names.
+* Names in policies are placeholders. Replace `"your-bucket"` and `"your-db"` with your actual names.
 * The `PassRole` policy allows Glue jobs to pass execution roles — critical for Glue job execution.
 * AWS managed policies like `AWSLambdaBasicExecutionRole` and `AWSGlueServiceRole` are used alongside these custom policies for base permissions.
