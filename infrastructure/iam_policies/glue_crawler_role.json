@@ -31,7 +31,11 @@
         "glue:GetPartition",
         "glue:GetPartitions"
       ],
-      "Resource": "*"
+      "Resource": [
+        "arn:aws:glue:us-east-1:123456789012:catalog",
+        "arn:aws:glue:us-east-1:123456789012:database/your-db",
+        "arn:aws:glue:us-east-1:123456789012:table/your-db/*"
+      ]
     },
     {
       "Sid": "CloudWatchLogsAccess",
@@ -41,7 +45,9 @@
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:*:*:*"
+      "Resource": [
+        "arn:aws:logs:us-east-1:123456789012:log-group:/aws-glue/*"
+      ]
     }
   ]
 }
