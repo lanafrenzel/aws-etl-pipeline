@@ -1,32 +1,38 @@
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "InvokeLambdaFunction",
-      "Effect": "Allow",
-      "Action": "lambda:InvokeFunction",
-      "Resource": "arn:aws:lambda:us-east-1:334960985201:function:your-lambda-function"
-    },
-    {
-      "Sid": "StartAndMonitorGlueJob",
-      "Effect": "Allow",
-      "Action": [
-        "glue:StartJobRun",
-        "glue:GetJobRun",
-        "glue:GetJobRuns",
-        "glue:GetJob"
-      ],
-      "Resource": "arn:aws:glue:us-east-1:334960985201:job/your-glue-job-name"
-    },
-    {
-      "Sid": "CloudWatchLogsAccess",
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    }
-  ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "InvokeLambdaFunction",
+			"Effect": "Allow",
+			"Action": "lambda:InvokeFunction",
+			"Resource": "arn:aws:lambda:us-east-1:334960985201:function:extract"
+		},
+		{
+			"Sid": "StartAndMonitorGlueJob",
+			"Effect": "Allow",
+			"Action": [
+				"glue:StartJobRun",
+				"glue:GetJobRun",
+				"glue:GetJobRuns",
+				"glue:GetJob"
+			],
+			"Resource": "arn:aws:glue:us-east-1:334960985201:job/Transform"
+		},
+		{
+			"Sid": "AllowPassRoleToGlue",
+			"Effect": "Allow",
+			"Action": "iam:PassRole",
+			"Resource": "arn:aws:iam::334960985201:role/GlueExecutionRole"
+		},
+		{
+			"Sid": "CloudWatchLogsAccess",
+			"Effect": "Allow",
+			"Action": [
+				"logs:CreateLogGroup",
+				"logs:CreateLogStream",
+				"logs:PutLogEvents"
+			],
+			"Resource": "*"
+		}
+	]
 }
