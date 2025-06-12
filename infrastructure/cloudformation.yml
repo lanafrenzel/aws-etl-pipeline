@@ -249,6 +249,36 @@ Resources:
               Action: iam:PassRole
               Resource: arn:aws:iam::334960985201:role/glue-execution
 
+  StepFunctionFailureSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: StepFunctionFailureAlerts
+
+  StepFunctionFailureSNSTopicSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref StepFunctionFailureSNSTopic
+      Protocol: email
+      Endpoint: your.email@example.com  # <-- change this
+
+  StepFunctionFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: StepFunctionFailedExecutions
+      Namespace: AWS/States
+      MetricName: ExecutionsFailed
+      Dimensions:
+        - Name: StateMachineArn
+          Value: arn:aws:states:${Region}:${AWSAccountId}:stateMachine:ETLMachine  # <-- change if needed
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref StepFunctionFailureSNSTopic
+      TreatMissingData: notBreaching
+       
 
 Outputs:
   LambdaExecutionRoleArn:
@@ -270,4 +300,5 @@ Outputs:
   StepFunctionExecutionRoleArn:
     Description: ARN of the Step Functions execution role
     Value: !GetAtt StepFunctionExecutionRole.Arn
+
 
