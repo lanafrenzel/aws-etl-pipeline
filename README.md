@@ -9,7 +9,7 @@ This project demonstrates building a **serverless, automated ETL pipeline** on A
 ## Goals
 
 * Master AWS Data Engineering tools: Glue, S3, Lambda, Redshift, IAM, CloudWatch, Step Functions
-* Build a production-ready ETL pipeline with error handling, retries, and testing
+* Build a production-ready ETL pipeline with error handling and retries
 * Create CI/CD-friendly code and infrastructure
 * Follow best practices for security and maintainability
 
@@ -41,7 +41,6 @@ This project demonstrates building a **serverless, automated ETL pipeline** on A
 * Data Warehouse: Amazon Redshift Serverless (Free Tier)
 * Monitoring: CloudWatch + Alarms
 * Security: IAM Roles & Policies (Least Privilege)
-* Testing: Pytest + moto + Glue local testing
 * CI/CD: AWS CodePipeline or GitHub Actions
 
 ---
@@ -53,7 +52,6 @@ This project demonstrates building a **serverless, automated ETL pipeline** on A
 * Data validation and schema evolution support in Glue transformations
 * YAML configuration for pipeline flexibility
 * Secure IAM policies following least privilege principle
-* Unit and integration tests for Lambda and Glue jobs
 * CI/CD ready with clean, modular code structure
 
 ---
