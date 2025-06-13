@@ -77,9 +77,6 @@ Public APIs used:
 ├── infrastructure/
 │   ├── cloudformation.yml           # Infrastructure as Code (CloudFormation/CDK)
 │   └── iam_policies/                # IAM policies with least privilege
-├── tests/
-│   ├── test_lambda.py               # Unit tests for Lambda
-│   └── test_glue_transform.py       # Tests for Glue jobs
 ├── config/
 │   └── pipeline_config.yml          # Pipeline configuration file
 ├── README.md                        # This file
