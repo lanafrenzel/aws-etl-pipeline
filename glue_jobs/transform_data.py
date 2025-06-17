@@ -6,6 +6,7 @@
 
 import os
 import sys
+import traceback
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
@@ -14,13 +15,13 @@ from awsglue.job import Job
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
-# Initialize Spark context
+# Initialize Spark and Glue contexts
 sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 
-# Configuration
+# Configuration from environment variables or defaults
 RAW_BUCKET = os.environ.get('RAW_BUCKET', 'your-bucket')
 CLEAN_BUCKET = os.environ.get('CLEAN_BUCKET', 'your-bucket')
 RAW_PREFIX = os.environ.get('RAW_PREFIX', 'raw/')
@@ -79,20 +80,16 @@ def process_stock_data():
 
     except Exception as e:
         print(f"Processing failed: {str(e)}")
+        traceback.print_exc()
         return False
 
-    if success:
-        print("ETL pipeline completed successfully")
-    else:
-        print("ETL pipeline failed")
-        sys.exit(1)
-
-# Execute transformation
 if __name__ == "__main__":
+    job.init("Transform")
     success = process_stock_data()
-    
     if success:
         print("ETL pipeline completed successfully!")
+        job.commit()
     else:
         print("ETL pipeline failed!")
+        job.commit()  # Even on failure, commit so Glue logs properly
         sys.exit(1)
