@@ -2,7 +2,7 @@ import json
 import os
 import boto3
 import urllib3
-from datetime import datetime
+from  import datetime
 from botocore.exceptions import ClientError
 
 http = urllib3.PoolManager()
