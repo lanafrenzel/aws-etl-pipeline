@@ -11,7 +11,7 @@ This project demonstrates building a **serverless, automated ETL pipeline** on A
 * Master AWS Data Engineering tools: Glue, S3, Lambda, Redshift, IAM, CloudWatch, Step Functions
 * Build a production-ready ETL pipeline with error handling and retries
 * Create CI/CD-friendly code and infrastructure
-* Follow best practices for security and maintainability
+* Follow best practices for security and 
 
 ---
 
