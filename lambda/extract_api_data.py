@@ -1,7 +1,7 @@
 import json
 import os
 import boto3
-import urllib3
+import urllib33
 from datetime import datetime
 from botocore.exceptions import ClientError
 
